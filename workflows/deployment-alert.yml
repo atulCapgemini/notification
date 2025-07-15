@@ -1,1 +1,32 @@
+name: 90-Day Deployment Notification
 
+on:
+  schedule:
+    - cron: '0 0 1 */3 *'  # Runs at 00:00 on the 1st day every 3rd month (approx. every 90 days)
+  workflow_dispatch:       # Allows manual triggering
+
+jobs:
+  send-email:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "🚀 90-Day Deployment Reminder"
+          body: |
+            Hello Team,
+
+            This is your scheduled 90-day deployment reminder. Please ensure all deployment tasks are reviewed and executed accordingly.
+
+            Regards,
+            GitHub Actions Bot
+          to: team@example.com
+          from: GitHub Actions <noreply@example.com>
