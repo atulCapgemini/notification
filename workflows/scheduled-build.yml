@@ -1,0 +1,39 @@
+name: Scheduled Build with Date Update
+
+on:
+  schedule:
+    - cron: '0 5 * * *'  # Runs daily at 5:00 AM UTC
+  workflow_dispatch:      # Allows manual trigger
+
+jobs:
+  build-and-update-date:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read date from file
+        id: read_date
+        run: |
+          DATE=$(cat date.txt)
+          echo "Date from file: $DATE"
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Run your build
+        run: |
+          echo "Running build for date: ${{ steps.read_date.outputs.date }}"
+          # Insert your actual build commands here
+
+      - name: Update date in file
+        run: |
+          NEW_DATE=$(date -I)  # ISO format: YYYY-MM-DD
+          echo "$NEW_DATE" > date.txt
+
+      - name: Commit and push updated date
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add date.txt
+          git commit -m "Update date to $NEW_DATE"
+          git push
