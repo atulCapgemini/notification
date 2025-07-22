@@ -34,7 +34,7 @@ jobs:
         env:
           TOKEN: ${{ secrets.GH_PAT }}
         run: |        
-          echo "TOKEN: ${{ TOKEN }}"
+          echo "TOKEN: ${TOKEN}"
           git config user.name "atulCapgemini"
           git config user.email "atul.b.jain@capgemini.com"
           git remote set-url origin https://atulCapgemini:${TOKEN}@github.com/atulCapgemini/notification.git
