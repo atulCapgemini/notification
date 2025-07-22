@@ -17,7 +17,9 @@ jobs:
         id: read_date
         run: |
           DATE=$(cat date.txt)
+          TOKEN: ${{ secrets.GH_PAT }}
           echo "Date from file: $DATE"
+          echo "TOKEN is file: $TOKEN"
           echo "date=$DATE" >> $GITHUB_OUTPUT
 
       - name: Run your build
@@ -33,11 +35,12 @@ jobs:
       - name: Push changes using PAT
         env:
           TOKEN: ${{ secrets.GH_PAT }}
-        run: |
+        run: |        
           git config user.name "atulCapgemini"
           git config user.email "atul.b.jain@capgemini.com"
-          git config user.password "Imatuljain@88"
+          git remote set-url origin https://atulCapgemini:${TOKEN}@github.com/atulCapgemini/notification.git
           git add date.txt
           git commit -m "Update date to $(cat date.txt)"
           git push
+
 
