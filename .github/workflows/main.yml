@@ -29,8 +29,7 @@ jobs:
         run: |
           NEW_DATE=$(date -I)  # ISO format: YYYY-MM-DD
           echo "$NEW_DATE" > date.txt
-
-      -
+      
       - name: Push changes using PAT
         env:
           TOKEN: ${{ secrets.GH_PAT }}
