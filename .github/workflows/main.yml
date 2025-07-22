@@ -30,10 +30,15 @@ jobs:
           NEW_DATE=$(date -I)  # ISO format: YYYY-MM-DD
           echo "$NEW_DATE" > date.txt
 
-      - name: Commit and push updated date
+      -
+      - name: Push changes using PAT
+        env:
+          TOKEN: ${{ secrets.GH_PAT }}
         run: |
           git config user.name "atulCapgemini"
           git config user.email "atul.b.jain@capgemini.com"
+          git remote set-url origin https://atulCapgemini:${TOKEN}@github.com/atulCapgemini/notification.git
           git add date.txt
-          git commit -m "Update date to $NEW_DATE"
+          git commit -m "Update date to $(cat date.txt)"
           git push
+
