@@ -17,7 +17,6 @@ jobs:
         id: read_date
         run: |
           DATE=$(cat date.txt)
-          TOKEN: ${{ secrets.GH_PAT }}
           echo "Date from file: $DATE"           
           echo "date=$DATE" >> $GITHUB_OUTPUT
 
