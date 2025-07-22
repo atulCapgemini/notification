@@ -19,7 +19,7 @@ jobs:
           DATE=$(cat date.txt)
           TOKEN: ${{ secrets.GH_PAT }}
           echo "Date from file: $DATE"
-          echo "TOKEN is file: $TOKEN"
+          echo "TOKEN is file: ${TOKEN}"
           echo "date=$DATE" >> $GITHUB_OUTPUT
 
       - name: Run your build
