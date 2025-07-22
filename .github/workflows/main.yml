@@ -32,8 +32,8 @@ jobs:
 
       - name: Commit and push updated date
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "atulCapgemini"
+          git config user.email "atul.b.jain@capgemini.com"
           git add date.txt
           git commit -m "Update date to $NEW_DATE"
           git push
