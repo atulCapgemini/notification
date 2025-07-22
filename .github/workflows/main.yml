@@ -37,7 +37,6 @@ jobs:
           git config user.name "atulCapgemini"
           git config user.email "atul.b.jain@capgemini.com"
           git config user.password "Imatuljain@88"
-          git remote set-url origin https://atulCapgemini:${TOKEN}@github.com/atulCapgemini/notification.git
           git add date.txt
           git commit -m "Update date to $(cat date.txt)"
           git push
