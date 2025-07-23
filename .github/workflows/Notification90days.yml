@@ -23,7 +23,7 @@ jobs:
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
             -F environment="$ENV" \
             -F ref="refs/heads/main" \
-            -q '.created_at')          
+            -q '.["created_at"]')          
           DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
           DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
           NOW_TIMESTAMP=$(date +%s)
