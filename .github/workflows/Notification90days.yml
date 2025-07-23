@@ -23,12 +23,9 @@ jobs:
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
             -F environment="$ENV" \
             -F ref="refs/heads/main" \
-            -q )       
+            -q '.[0]')       
             echo "Deployment info is $DEPLOYMENT_JSON "
-
-          echo "Deployment is $AGE days old."
-          echo "age=$AGE" >> $GITHUB_OUTPUT
-
+ 
       - name: Notify if older than 90 days
         if: steps.check.outputs.age > 90
         run: |
