@@ -10,29 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check deployment age
+        id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENVIRONMENT: "production"         # Change to your environment
-          BRANCH: "refs/heads/main"                    # Change to your branch
+          ENVIRONMENT: "production"
+          BRANCH: "refs/heads/main"
         run: |
           REPO="${{ github.repository }}"
 
-          # Get deployments for the environment
-          # DEPLOYMENTS=$(gh api repos/$REPO/deployments \
-          #   --jq '[.[] | select(.environment == env.ENVIRONMENT and .ref == env.BRANCH)]')
           DEPLOYMENTS=$(gh api repos/$REPO/deployments \
-            --jq '[.[0] | select(.environment == env.ENVIRONMENT and .ref== env.BRANCH)]')
+            --jq '[.[0] | select(.environment == env.ENVIRONMENT and .ref == env.BRANCH)]')
           echo "DEPLOYMENTS info is $DEPLOYMENTS"
 
-          # DEPLOYMENTS2=$(gh api repos/$REPO/deployments \
-          #   --jq '[.[]]')
-          # echo "DEPLOYMENTS2 info:::::::::::::::::::: is $DEPLOYMENTS2"
           if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
             echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
+            echo "age=0" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Loop through deployments to find the latest successful one
           for row in $(echo "$DEPLOYMENTS" | jq -r '.[] | @base64'); do
             _jq() {
               echo "${row}" | base64 --decode | jq -r "${1}"
@@ -40,18 +35,15 @@ jobs:
 
             DEPLOYMENT_ID=$(_jq '.id')
             DEPLOYMENT_DATE=$(_jq '.created_at')
-
-            #DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
             DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
             NOW_TIMESTAMP=$(date +%s)
             AGE=$(( (NOW_TIMESTAMP - DEPLOYMENT_TIMESTAMP) / 86400 ))
-  
+
             echo "Deployment is $AGE days old."
             echo "age=$AGE" >> $GITHUB_OUTPUT
-  
+          done
+
       - name: Notify if older than 90 days
         if: steps.check.outputs.age > 90
         run: |
-            echo "⚠️ Deployment is older than 90 days!"
-       
-         
+          echo "⚠️ Deployment is older than 90 days!"
