@@ -25,7 +25,7 @@ jobs:
           echo "DEPLOYMENTS info is $DEPLOYMENTS"
 
           DEPLOYMENTS2=$(gh api repos/$REPO/deployments \
-            --jq '[.[] | select(.environment == env.ENVIRONMENT and .ref== env.BRANCH)]')
+            --jq '[.[])
           echo "DEPLOYMENTS2 info:::::::::::::::::::: is $DEPLOYMENTS2"
           if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
             echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
