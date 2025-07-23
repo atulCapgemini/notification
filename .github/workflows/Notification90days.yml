@@ -22,8 +22,7 @@ jobs:
           REPO="${{ github.repository }}"          
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
             -F environment="$ENV" \
-            -F ref="refs/heads/main" \
-            -q )
+            -F ref="refs/heads/main" )
           echo "Deployment info is is $DEPLOYMENT_JSON "            
          
 
