@@ -21,7 +21,7 @@ jobs:
           DEPLOYMENTS=$(gh api repos/$REPO/deployments \
             -F environment="$ENVIRONMENT" \
             -F sha="$BRANCH" \
-            --jq '[.[] ]')
+            --jq '.[0]')
 
           if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
             echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
