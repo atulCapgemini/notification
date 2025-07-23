@@ -19,7 +19,7 @@ jobs:
 
           # Get deployments for the environment
           DEPLOYMENTS=$(gh api repos/$REPO/deployments \
-            --jq '[.[] | select(.environment == env.ENVIRONMENT and .ref == env.BRANCH) ]')
+            --jq '[.[] | select(.environment == env.ENVIRONMENT) ]')
 
           echo "DEPLOYMENTS info: $DEPLOYMENTS "
           if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
