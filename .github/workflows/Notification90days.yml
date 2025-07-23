@@ -13,7 +13,7 @@ jobs:
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENVIRONMENT: "production"
+          ENVIRONMENT: "test"
           BRANCH: "refs/heads/main"
         run: |
           REPO="${{ github.repository }}"
