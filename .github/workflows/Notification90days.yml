@@ -1,6 +1,7 @@
 name: Check Deployment Age for Specific Environment
 
 on:
+  push:
   schedule:
     - cron: '0 0 * * *'  # Daily at midnight UTC
   workflow_dispatch:
@@ -25,7 +26,7 @@ jobs:
           echo "DEPLOYMENTS info is $DEPLOYMENTS"
 
           DEPLOYMENTS2=$(gh api repos/$REPO/deployments \
-            --jq '[.[])
+            --jq '[.[]]')
           echo "DEPLOYMENTS2 info:::::::::::::::::::: is $DEPLOYMENTS2"
           if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
             echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
