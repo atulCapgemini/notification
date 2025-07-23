@@ -23,7 +23,7 @@ jobs:
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
             -F environment="$ENV" \
             -F ref="refs/heads/main" \
-            -q '.[0]')
+            -q )
           echo "Deployment info is is $DEPLOYMENT_JSON "            
          
 
