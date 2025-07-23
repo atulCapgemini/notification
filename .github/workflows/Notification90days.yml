@@ -1,39 +1,30 @@
 name: Check Deployment Age
 
 on:
-  push: 
   schedule:
-    - cron: '0 12 * * 1' # Runs every Monday at 12:00 UTC
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:     # Allows manual triggering
 
 jobs:
-  check-deployment:
+  check-deployment-age:
     runs-on: ubuntu-latest
     steps:
-      - name: Install GitHub CLI
-        run: sudo apt install gh -y
-
-      - name: Authenticate GH CLI
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
-
-      - name: Check latest deployment time
-        id: check
+      - name: Check latest deployment age
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ENV="production"
-          REPO="${{ github.repository }}"          
-          DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
-            -F environment="$ENV" \
-            -F ref="refs/heads/main" \
-            -q '')          
-          DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
-          echo "DEPLOYMENT_DATE is $DEPLOYMENT_DATE days old."
-           
-      - name: Notify if older than 90 days
-        if: steps.check.outputs.age > 90
-        run: |
-          echo "⚠️ Deployment is older than 90 days!"
+          REPO="${{ github.repository }}"
+          DEPLOYMENT=$(gh api repos/$REPO/deployments --jq '.[0]')
+          CREATED_AT=$(echo "$DEPLOYMENT" | jq -r '.created_at')
+          CREATED_DATE=$(date -d "$CREATED_AT" +%s)
+          NOW=$(date +%s)
+          AGE_DAYS=$(( (NOW - CREATED_DATE) / 86400 ))
 
-          # You can replace this with sending:
-          # - Slack notification
-          # - GitHub issue creation
-          # - Email (via external API or sendmail)
+          echo "Deployment age: $AGE_DAYS days"
+
+          if [ "$AGE_DAYS" -gt 90 ]; then
+            echo "Deployment is older than 90 days!"
+            # Send notification (e.g., Slack, email, GitHub issue)
+            # Example: create an issue
+            gh issue create --title "Deployment is older than 90 days" --body "The latest deployment is $AGE_DAYS days old. Please review."
+          fi
