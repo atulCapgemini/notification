@@ -39,23 +39,19 @@ jobs:
             }
 
             DEPLOYMENT_ID=$(_jq '.id')
-            CREATED_AT=$(_jq '.created_at')
+            DEPLOYMENT_DATE=$(_jq '.created_at')
 
-            # Check deployment status
-            STATUS=$(gh api repos/$REPO/deployments/$DEPLOYMENT_ID/statuses --jq '.[0].state')
-
-            if [ "$STATUS" == "success" ]; then
-              CREATED_DATE=$(date -d "$CREATED_AT" +%s)
-              NOW=$(date +%s)
-              AGE_DAYS=$(( (NOW - CREATED_DATE) / 86400 ))
-
-              echo "Latest successful deployment is $AGE_DAYS days old."
-
-              if [ "$AGE_DAYS" -gt 90 ]; then
-                echo "Deployment is older than 90 days!"
-                gh issue create --title "Deployment is older than 90 days" \
-                  --body "The latest successful deployment to '$ENVIRONMENT' from branch '$BRANCH' is $AGE_DAYS days old."
-              fi
-              break
-            fi
-          done
+            #DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
+            DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
+            NOW_TIMESTAMP=$(date +%s)
+            AGE=$(( (NOW_TIMESTAMP - DEPLOYMENT_TIMESTAMP) / 86400 ))
+  
+            echo "Deployment is $AGE days old."
+            echo "age=$AGE" >> $GITHUB_OUTPUT
+  
+      - name: Notify if older than 90 days
+        if: steps.check.outputs.age > 90
+        run: |
+            echo "⚠️ Deployment is older than 90 days!"
+       
+         
