@@ -27,13 +27,7 @@ jobs:
             -q '')          
           DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
           echo "DEPLOYMENT_DATE is $DEPLOYMENT_DATE days old."
-          #DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
-          #NOW_TIMESTAMP=$(date +%s)
-          #AGE=$(( (NOW_TIMESTAMP - DEPLOYMENT_TIMESTAMP) / 86400 ))
-
-          echo "Deployment is $AGE days old."
-          echo "age=$AGE" >> $GITHUB_OUTPUT
-
+           
       - name: Notify if older than 90 days
         if: steps.check.outputs.age > 90
         run: |
