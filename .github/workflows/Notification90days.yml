@@ -19,10 +19,11 @@ jobs:
         id: check
         run: |
           ENV="production"
-          REPO="${{ github.repository }}"
+          REPO="${{ github.repository }}"          
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
-            -F -q '.[0]')
-          
+            -F environment="$ENV" \
+            -F ref="refs/heads/main" \
+            -q '.[0]')          
           DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
           DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
           NOW_TIMESTAMP=$(date +%s)
