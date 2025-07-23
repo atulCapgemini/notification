@@ -1,56 +1,22 @@
-name: Check Deployment Age for Specific Environment
+name: Check Deployment Age
 
 on:
   schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
-  workflow_dispatch:
+    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+  workflow_dispatch:     # Allows manual triggering
 
 jobs:
   check-deployment-age:
     runs-on: ubuntu-latest
     steps:
-      - name: Check deployment age
+      - name: Check latest deployment age
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENVIRONMENT: "production"         # Change to your environment name
-          BRANCH: "main"                    # Change to your branch name
         run: |
           REPO="${{ github.repository }}"
+          DEPLOYMENT=$(gh api repos/$REPO/deployments --jq '.[0]')
           
-          # Get deployments for the specific environment and branch
-          DEPLOYMENTS=$(gh api repos/$REPO/deployments \
-            -F environment="$ENVIRONMENT" \
-            -F sha="$BRANCH" \
-            --jq '[.[] | select(.environment == env.ENVIRONMENT  )]')
 
-          if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
-            echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
-            exit 0
-          fi
+          echo "Deployment age: $DEPLOYMENT days"
 
-          # Get the latest successful deployment
-          for row in $(echo "$DEPLOYMENTS" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo "${row}" | base64 --decode | jq -r "${1}"
-            }
-
-            DEPLOYMENT_ID=$(_jq '.id')
-            STATUS=$(gh api repos/$REPO/deployments/$DEPLOYMENT_ID/statuses --jq '.[0].state')
-
-            if [ "$STATUS" == "success" ]; then
-              CREATED_AT=$(_jq '.created_at')
-              CREATED_DATE=$(date -d "$CREATED_AT" +%s)
-              NOW=$(date +%s)
-              AGE_DAYS=$(( (NOW - CREATED_DATE) / 86400 ))
-
-              echo "Latest successful deployment is $AGE_DAYS days old."
-
-              if [ "$AGE_DAYS" -gt 90 ]; then
-                echo "Deployment is older than 90 days!"
-                # Example: Create a GitHub issue
-                gh issue create --title "Deployment is older than 90 days" \
-                  --body "The latest successful deployment to '$ENVIRONMENT' from branch '$BRANCH' is $AGE_DAYS days old."
-              fi
-              break
-            fi
-          done
+         
