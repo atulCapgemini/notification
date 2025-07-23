@@ -23,7 +23,7 @@ jobs:
           DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
             -F environment="$ENV" \
             -F ref="refs/heads/main" \
-            -q '.[0]')       
+            -q '')       
             echo "Deployment info is $DEPLOYMENT_JSON "
  
       - name: Notify if older than 90 days
