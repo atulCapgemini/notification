@@ -1,0 +1,42 @@
+name: Check Deployment Age
+
+on:
+  schedule:
+    - cron: '0 12 * * 1' # Runs every Monday at 12:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install GitHub CLI
+        run: sudo apt install gh -y
+
+      - name: Authenticate GH CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Check latest deployment time
+        id: check
+        run: |
+          ENV="production"
+          REPO="${{ github.repository }}"
+          DEPLOYMENT_JSON=$(gh api repos/$REPO/deployments \
+            -F environment=$ENV -q '.[0]')
+          
+          DEPLOYMENT_DATE=$(echo "$DEPLOYMENT_JSON" | jq -r '.created_at')
+          DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
+          NOW_TIMESTAMP=$(date +%s)
+          AGE=$(( (NOW_TIMESTAMP - DEPLOYMENT_TIMESTAMP) / 86400 ))
+
+          echo "Deployment is $AGE days old."
+          echo "age=$AGE" >> $GITHUB_OUTPUT
+
+      - name: Notify if older than 90 days
+        if: steps.check.outputs.age > 90
+        run: |
+          echo "⚠️ Deployment is older than 90 days!"
+
+          # You can replace this with sending:
+          # - Slack notification
+          # - GitHub issue creation
+          # - Email (via external API or sendmail)
