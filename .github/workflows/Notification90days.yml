@@ -1,8 +1,6 @@
 name: Check Deployment Age for Specific Environment
 
 on:
-  schedule:
-    - cron: '0 0 * * *'  # Daily at midnight UTC
   workflow_dispatch:
 
 jobs:
@@ -13,38 +11,10 @@ jobs:
         id: check
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ENVIRONMENT: "production"
-          BRANCH: "refs/heads/main"
         run: |
           REPO="${{ github.repository }}"
           echo "REPO info is $REPO"
 
           DEPLOYMENTS=$(gh api repos/$REPO/deployments \
-            --jq '[.[0] | select(.environment == env.ENVIRONMENT and .ref == env.BRANCH)]')
+            --jq '[.[] ]')
           echo "DEPLOYMENTS info is $DEPLOYMENTS"
-
-          if [ "$(echo "$DEPLOYMENTS" | jq length)" -eq 0 ]; then
-            echo "No deployments found for environment '$ENVIRONMENT' and branch '$BRANCH'."
-            echo "age=0" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          for row in $(echo "$DEPLOYMENTS" | jq -r '.[] | @base64'); do
-            _jq() {
-              echo "${row}" | base64 --decode | jq -r "${1}"
-            }
-
-            DEPLOYMENT_ID=$(_jq '.id')
-            DEPLOYMENT_DATE=$(_jq '.created_at')
-            DEPLOYMENT_TIMESTAMP=$(date -d "$DEPLOYMENT_DATE" +%s)
-            NOW_TIMESTAMP=$(date +%s)
-            AGE=$(( (NOW_TIMESTAMP - DEPLOYMENT_TIMESTAMP) / 86400 ))
-
-            echo "Deployment is $AGE days old."
-            echo "age=$AGE" >> $GITHUB_OUTPUT
-          done
-
-      - name: Notify if older than 90 days
-        if: steps.check.outputs.age > 90
-        run: |
-          echo "⚠️ Deployment is older than 90 days!"
