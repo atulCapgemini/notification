@@ -17,6 +17,7 @@ jobs:
           BRANCH: "refs/heads/main"
         run: |
           REPO="${{ github.repository }}"
+          echo "REPO info is $REPO"
 
           DEPLOYMENTS=$(gh api repos/$REPO/deployments \
             --jq '[.[0] | select(.environment == env.ENVIRONMENT and .ref == env.BRANCH)]')
