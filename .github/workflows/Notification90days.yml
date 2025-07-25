@@ -2,7 +2,8 @@ name: Check Deployment Age for Specific Environment
 
 on:
  push:
-
+ workflow_dispatch:
+ 
 jobs:
   check-deployment-age:
     runs-on: ubuntu-latest
